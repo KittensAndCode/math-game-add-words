@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Word Adder</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      padding: 20px;
+    }
+    button {
+      margin: 5px 0;
+      padding: 6px 10px;
+      font-family: monospace;
+    }
+    input {
+      padding: 5px;
+      font-family: monospace;
+    }
+    pre {
+      background: #222;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Word Adder</h1>
+<p>Static HTML + JavaScript version</p>
+
+<button onclick="rebuildCache()">1: Rebuild Cache</button><br>
+<input id="wordInput" placeholder="Enter string" />
+<button onclick="calculateInput()">2: Calculate String</button><br>
+<button onclick="getPossibilities()">3: Get Possibilities</button>
+
+<pre id="output">Starting...</pre>
+
+<script>
+const LETTERS = {
+  a: 13, b: 12, c: 11, d: 10, e: 9,  f: 8,  g: 7,
+  h: 6,  i: 5,  j: 4,  k: 3,  l: 2,  m: 1,
+  n: 0,  o: -1, p: -2, q: -3, r: -4, s: -5,
+  t: -6, u: -7, v: -8, w: -9, x: -10, y: -11, z: -12
+};
+
+let DATA = {};
+let CACHE = {};
+
+const output = document.getElementById("output");
+
+function log(msg) {
+  output.textContent += "\n" + msg;
+}
+
+// Load JSON files
+async function loadFiles() {
+  try {
+    const dataResp = await fetch("words_dictionary.json");
+    DATA = await dataResp.json();
+
+    const cacheResp = await fetch("cache.json");
+    CACHE = await cacheResp.json();
+
+    log("Files loaded");
+  } catch (err) {
+    log("Error loading files: " + err);
+  }
+}
+
+function calculateString(str) {
+  if (CACHE[str] !== undefined) {
+    return CACHE[str];
+  }
+
+  let total = 0;
+  for (const char of str.toLowerCase()) {
+    if (LETTERS[char] !== undefined) {
+      total += LETTERS[char];
+    }
+  }
+  return total;
+}
+
+function rebuildCache() {
+  CACHE = {};
+  for (const word in DATA) {
+    CACHE[word] = calculateString(word);
+  }
+  log("Rebuilt Cache!");
+  log("(Note: Cache is in-memory only in static mode)");
+}
+
+function calculateInput() {
+  const word = document.getElementById("wordInput").value;
+  const result = calculateString(word);
+  log(`"${word}" = ${result}`);
+}
+
+function getPossibilities() {
+  log("Getting possibilities...");
+  setTimeout(() => {
+    log("Gotten!");
+  }, 1000);
+}
+
+// Start
+output.textContent = "Starting...\nLoading files...";
+loadFiles();
+</script>
+
+</body>
+</html>
